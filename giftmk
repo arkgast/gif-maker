@@ -1,0 +1,76 @@
+#!/bin/bash
+
+FILE=""
+DELAY=5
+DURATION=10
+
+display_help() {
+  echo "Usage:"
+  echo "  $0 [OPTIONS]"
+  echo
+  echo "Example:"
+  echo "  $0 --file ~/my-cool.gif --duration 10 --delay 5"
+  echo
+  echo "Options:"
+  echo "  -f, --file              Gif ubication"
+  echo "  -d, --duration          Duration of the gif (default: 10 seconds) "
+  echo "  -e, --delay             Delay before start (default: 5 seconds) "
+  echo
+  exit 1
+}
+
+countdown_message() {
+  let delay=$DELAY
+  while [ "$delay" -gt 0 ]
+  do
+    echo -ne "The record will start in: " $delay \\t
+    echo -ne \\r
+    delay=$(( delay - 1 ))
+    sleep 1
+  done
+}
+
+make_gif() {
+  if [ -z "$FILE" ]
+  then
+    display_help
+  fi
+
+  ARGS=$(xrectsel "--x=%x --y=%y --width=%w --height=%h")
+  countdown_message
+  byzanz-record -c --verbose --duration=$DURATION --delay=0 ${ARGS} $FILE
+  exit 0
+}
+
+read_params() {
+  if [[ $# -eq 0 ]]
+  then
+    echo "$0 -h or --help to get help"
+    exit 1
+  fi
+
+  while getopts :h:f:d:e:-: arg
+  do
+    case $arg in
+      f ) FILE=$OPTARG ;;
+      d ) DURATION=$OPTARG ;;
+      e ) DELAY=$OPTARG ;;
+      h ) display_help ;;
+      - ) LONG_OPTARG="${OPTARG#*=}"
+        case $OPTARG in
+          file=?*     ) FILE=$LONG_OPTARG ;;
+          duration=?* ) DURATION=$LONG_OPTARG ;;
+          delay=?*    ) DELAY=$LONG_OPTARG ;;
+          help        ) display_help ;;
+          ''          ) break ;;
+          *           ) echo "Illegal option --$OPTARG" >&2; exit 2 ;;
+        esac ;;
+      * ) break ;;
+      \? ) exit 2 ;;
+    esac
+  done
+  shift $((OPTIND-1))
+}
+
+read_params "$@"
+make_gif

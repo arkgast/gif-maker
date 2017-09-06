@@ -24,6 +24,6 @@ Run this commands with root permissions
 
     $ clone https://github.com/arkgast/gif-maker && gif-maker
     $ chmod +x gifmk.bash
-    $ ./gifmk.bash ~/my-awesome.gif 10 5
+    $ ./gifmk -f ~/my-awesome.gif -d 10 -e 5
 
 Inspired on [this blog](http://geekotic.com/2014/09/01/alternativas-a-gifcam-en-linux/).
